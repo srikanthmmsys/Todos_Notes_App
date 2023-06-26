@@ -1,25 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import React, { createContext ,useState } from 'react'
+import Home from './components/Home'
+import './App.css'
+import { Route, Routes } from 'react-router-dom'
+import InputDataComponent from './components/InputDataComponent'
+export const context=createContext();
+const App = () => {
+  const [edit,setEdit]=useState([]);
+  const [editmode,setEditMode]=useState(false);
+  const [todos, setTodos] = useState([]);
+  const addTodoHandeller = (totalData) => {
+    setTodos([...todos, totalData]);
+  };
+ 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='background'>
+      <context.Provider value={[todos,setTodos,addTodoHandeller,edit,setEdit,editmode,setEditMode]}>
+      <Routes>
+        <Route path='/' element={<Home/>} />
+        <Route path='/add' element={<InputDataComponent />}/>
+      </Routes>
+      </context.Provider>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
