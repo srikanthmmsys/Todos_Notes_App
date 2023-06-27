@@ -5,6 +5,7 @@ import "../App.css";
 import AllDataDisplayComponent from "./AllDataDisplayComponent";
 import StaredDataDisplayComponent from "./StaredDataDisplayComponent";
 import DeleteDataDisplayComponent from "./DeleteDataDisplayComponent";
+
 const Home = () => {
   const navigate = useNavigate();
   const [todos, setTodos, , , setEdit, , setEditMode] = useContext(context);
@@ -12,12 +13,13 @@ const Home = () => {
   const [all, setAll] = useState(true);
   const [deleted, setDeleted] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState([]);
+  const [mainSearch, setMainSearch] = useState("");
 
   const deleteHandeller = (value) => {
     let deletCopy = [...todos];
     const deleteItem = deletCopy.find((val) => val.dt === value.dt);
     deleteItem.deleted = true;
-    deleteItem.stared=false;
+    deleteItem.stared = false;
     setTodos(deletCopy);
   };
   const finalDeleteHandeller = (value) => {
@@ -31,18 +33,18 @@ const Home = () => {
     setEditMode(true);
     navigate("/add");
   };
-  const allHandeller = (e) => {
+  const allHandeller = () => {
     setAll(true);
     setDeleted(false);
     setStared(false);
   };
-  const starHandeller = (e) => {
+  const starHandeller = () => {
     setDeleted(false);
     setStared(true);
     setAll(false);
     setTimeDisplay([]);
   };
-  const deletedHandeller = (e) => {
+  const deletedHandeller = () => {
     setDeleted(true);
     setAll(false);
     setStared(false);
@@ -77,109 +79,117 @@ const Home = () => {
     return acc;
   }, 0);
 
+  let search = todos.filter((value) =>
+    value.headding.toLowerCase().includes(mainSearch.toLowerCase())
+  );
+  let fil = !search ? todos : search;
   return (
     <>
-      
+      <div>
+        <div className=" d-flex flex-row w-50">
+          <h2 className="text-dark">Notes</h2>
+          <input
+            className="widthAuto m-2 inputsearch"
+            value={mainSearch}
+            onChange={(e) => {
+              setMainSearch(e.target.value);
+            }}
+          />
+          <Link to="/add">
+            <button className="btn btn-primary m-2 homeButton ">Add</button>
+          </Link>
+        </div>
+        <div className="w-50"></div>
+      </div>
+
+      <div className="d-flex  p-1">
         <div>
-          <div className=" d-flex flex-row w-50">
-            <h2 className="text-dark">Notes</h2>
-            <input className="widthAuto m-2 inputsearch" />
-            <Link to="/add">
-              <button className="btn btn-primary m-2 homeButton ">Add</button>
-            </Link>
-          </div>
-          <div className="w-50"></div>
+          <ul>
+            <li
+              className={all ? "textDecoration" : ""}
+              onClick={(e) => allHandeller(e)}
+            >
+              All ({countAll})
+            </li>
+            <li
+              className={stared ? "textDecoration" : ""}
+              onClick={(e) => starHandeller(e)}
+            >
+              Stared ({countStarred})
+            </li>
+            <li
+              className={deleted ? "textDecoration" : ""}
+              onClick={(e) => deletedHandeller(e)}
+            >
+              Deleted ({countDeleted})
+            </li>
+          </ul>
         </div>
 
-        <div className="d-flex  p-1">
-          <div>
-            <ul>
-              <li
-                className={all ? "textDecoration" : ""}
-                onClick={(e) => allHandeller(e)}
-              >
-                All ({countAll})
-              </li>
-              <li
-                className={stared ? "textDecoration" : ""}
-                onClick={(e) => starHandeller(e)}
-              >
-                Stared ({countStarred})
-              </li>
-              <li
-                className={deleted ? "textDecoration" : ""}
-                onClick={(e) => deletedHandeller(e)}
-              >
-                Deleted ({countDeleted})
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="p-3">
-              {all &&
-                todos.map((value, index) => {
-                  if (!value.deleted) {
-                    return (
-                      <AllDataDisplayComponent
-                        key={index}
-                        value={value}
-                        index={index}
-                        divtimeDisplayHandeller={divtimeDisplayHandeller}
-                        editHandeller={editHandeller}
-                        deleteHandeller={deleteHandeller}
-                        onStaredHandeller={onStaredHandeller}
-                      />
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
-            </div>
-            <div className=" p-3">
-              {stared &&
-                todos.map((value, index) => {
-                  if (value.stared) {
-                    return (
-                      <StaredDataDisplayComponent
-                        key={index}
-                        value={value}
-                        index={index}
-                        deleteHandeller={deleteHandeller}
-                        onStaredHandeller={onStaredHandeller}
-                      />
-                    );
-                  }
+        <div>
+          <div className="p-3">
+            {all &&
+              fil.map((value, index) => {
+                if (!value.deleted) {
+                  return (
+                    <AllDataDisplayComponent
+                      key={index}
+                      value={value}
+                      index={index}
+                      divtimeDisplayHandeller={divtimeDisplayHandeller}
+                      editHandeller={editHandeller}
+                      deleteHandeller={deleteHandeller}
+                      onStaredHandeller={onStaredHandeller}
+                    />
+                  );
+                } else {
                   return null;
-                })}
-            </div>
-            <div className=" p-3">
-              {deleted &&
-                todos.map((value, index) => {
-                  if (value.deleted) {
-                    return (
-                      <DeleteDataDisplayComponent
-                        key={index}
-                        value={value}
-                        index={index}
-                        finalDeleteHandeller={finalDeleteHandeller}
-                      />
-                    );
-                  }
-                  return null;
-                })}
-            </div>
+                }
+              })}
           </div>
-          {countAll !== 0 ? (
-            <div className="d-flex flex-column justify-content-start">
-              <h1>{timeDisplay[1]}</h1>
-              <p>{timeDisplay[0]}</p>
-            </div>
-          ) : (
-            ""
-          )}
+          <div className=" p-3">
+            {stared &&
+              todos.map((value, index) => {
+                if (value.stared) {
+                  return (
+                    <StaredDataDisplayComponent
+                      key={index}
+                      value={value}
+                      index={index}
+                      deleteHandeller={deleteHandeller}
+                      onStaredHandeller={onStaredHandeller}
+                    />
+                  );
+                }
+                return null;
+              })}
+          </div>
+          <div className=" p-3">
+            {deleted &&
+              todos.map((value, index) => {
+                if (value.deleted) {
+                  return (
+                    <DeleteDataDisplayComponent
+                      key={index}
+                      value={value}
+                      index={index}
+                      finalDeleteHandeller={finalDeleteHandeller}
+                    />
+                  );
+                }
+                return null;
+              })}
+          </div>
         </div>
-      
+        {countAll !== 0 ? (
+          <div className="d-flex flex-column justify-content-start">
+            <h1>{timeDisplay[1]}</h1>
+            <p>{timeDisplay[0]}</p>
+          </div>
+        ) : (
+          ""
+        )}
+      </div>
     </>
   );
 };
