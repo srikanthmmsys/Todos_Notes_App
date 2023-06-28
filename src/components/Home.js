@@ -1,20 +1,17 @@
-import React, { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { context } from "../App";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
-import AllDataDisplayComponent from "./AllDataDisplayComponent";
-import StaredDataDisplayComponent from "./StaredDataDisplayComponent";
-import DeleteDataDisplayComponent from "./DeleteDataDisplayComponent";
+import AllDataDisplayComponent from "./displayComponents/AllDataDisplayComponent";
+import StaredDataDisplayComponent from "./displayComponents/StaredDataDisplayComponent";
+import DeleteDataDisplayComponent from "./displayComponents/DeleteDataDisplayComponent";
 
-const Home = () => {
+const Home = ({todos,setTodos,setEdit,setEditMode,mainSearch,setMainSearch,setSearchEdit}) => {
   const navigate = useNavigate();
-  const [todos, setTodos, , , setEdit, , setEditMode] = useContext(context);
   const [stared, setStared] = useState(false);
   const [all, setAll] = useState(true);
   const [deleted, setDeleted] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState([]);
-  const [mainSearch, setMainSearch] = useState("");
-
+  const [addBtnDisabled, setAddBtnDisabled] = useState(false);
   const deleteHandeller = (value) => {
     let deletCopy = [...todos];
     const deleteItem = deletCopy.find((val) => val.dt === value.dt);
@@ -83,6 +80,34 @@ const Home = () => {
     value.headding.toLowerCase().includes(mainSearch.toLowerCase())
   );
   let fil = !search ? todos : search;
+  const addDataHandeller = () => {
+    if (!mainSearch) {
+      navigate("/add");
+    } else if (search.length > 0) {
+      let searchTodo = todos.find((value) => value.headding === mainSearch);
+      if (!searchTodo) {
+        //     setErrorMessage('data allready exist want to edit then edit the data')
+        //     setEdit(searchTodo);
+        // setEditMode(true);
+        // navigate("/add");
+        // setAddBtnDisabled(true)
+        setSearchEdit(mainSearch);
+        navigate("/add");
+      } 
+      // else {
+        
+      // }
+    } else {
+      setSearchEdit(mainSearch);
+      navigate("/add");
+    }
+  };
+  const mainSearchHandeller = (e) => {
+    setMainSearch(e.target.value);
+    let todocop = [...todos];
+    let headds = todocop.map((val) => val.headding);
+    setAddBtnDisabled(headds.includes(e.target.value));
+  };
   return (
     <>
       <div>
@@ -91,43 +116,28 @@ const Home = () => {
           <input
             className="widthAuto m-2 inputsearch"
             value={mainSearch}
-            onChange={(e) => {
-              setMainSearch(e.target.value);
-            }}
+            onChange={(e) => mainSearchHandeller(e)}
           />
-          <Link to="/add">
-            <button className="btn btn-primary m-2 homeButton ">Add</button>
-          </Link>
+          <button
+            className="btn btn-primary m-2 homeButton "
+            disabled={addBtnDisabled}
+            onClick={addDataHandeller}
+          >
+            Add
+          </button>
         </div>
         <div className="w-50"></div>
       </div>
-
       <div className="d-flex  p-1">
         <div>
           <ul>
-            <li
-              className={all ? "textDecoration" : ""}
-              onClick={(e) => allHandeller(e)}
-            >
-              All ({countAll})
-            </li>
-            <li
-              className={stared ? "textDecoration" : ""}
-              onClick={(e) => starHandeller(e)}
-            >
-              Stared ({countStarred})
-            </li>
-            <li
-              className={deleted ? "textDecoration" : ""}
-              onClick={(e) => deletedHandeller(e)}
-            >
-              Deleted ({countDeleted})
-            </li>
+            <li className={all ? "textDecoration" : ""}onClick={(e) => allHandeller(e)}> All ({countAll})</li>
+            <li className={stared ? "textDecoration" : ""}onClick={(e) => starHandeller(e)}>Stared ({countStarred})</li>
+            <li className={deleted ? "textDecoration" : ""}onClick={(e) => deletedHandeller(e)}>Deleted ({countDeleted})</li>
           </ul>
         </div>
-
         <div>
-          <div className="p-3">
+          <div className="pl-3">
             {all &&
               fil.map((value, index) => {
                 if (!value.deleted) {
@@ -147,7 +157,7 @@ const Home = () => {
                 }
               })}
           </div>
-          <div className=" p-3">
+          <div className=" pl-3">
             {stared &&
               todos.map((value, index) => {
                 if (value.stared) {
@@ -164,7 +174,7 @@ const Home = () => {
                 return null;
               })}
           </div>
-          <div className=" p-3">
+          <div className=" pl-3">
             {deleted &&
               todos.map((value, index) => {
                 if (value.deleted) {
@@ -181,14 +191,11 @@ const Home = () => {
               })}
           </div>
         </div>
-        {countAll !== 0 ? (
-          <div className="d-flex flex-column justify-content-start">
-            <h1>{timeDisplay[1]}</h1>
+        {countAll !== 0 ? (<div className="d-flex flex-column justify-content-start ml-7 ovScroll"
+          style={{ position: "fixed", right: "20%", top: "10%" }}>
+            <h1 style={{overflow:"hidden",width:'300px',height:'41px'}}>{timeDisplay[1]}</h1>
             <p>{timeDisplay[0]}</p>
-          </div>
-        ) : (
-          ""
-        )}
+          </div>) : ("")}
       </div>
     </>
   );
