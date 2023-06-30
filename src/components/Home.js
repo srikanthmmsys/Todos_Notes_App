@@ -1,23 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
 import AllDataDisplayComponent from "./displayComponents/AllDataDisplayComponent";
 import StaredDataDisplayComponent from "./displayComponents/StaredDataDisplayComponent";
 import DeleteDataDisplayComponent from "./displayComponents/DeleteDataDisplayComponent";
-import InputDataComponent from "./InputDataComponent";
-const Home = () => {
-  const [todos, setTodos] = useState([]);
+
+const Home = ({todos,setTodos,setEdit,setEditMode,mainSearch,setMainSearch,setSearchEdit}) => {
+  const navigate = useNavigate();
   const [stared, setStared] = useState(false);
   const [all, setAll] = useState(true);
   const [deleted, setDeleted] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState([]);
   const [addBtnDisabled, setAddBtnDisabled] = useState(false);
-  const [mainSearch, setMainSearch] = useState("");
-  const [poopupDisplay,setPopupDispay]=useState(false)
-  
-
-  const addTodoHandeller = (totalData) => {
-    setTodos([...todos, totalData]);
-  };
   const deleteHandeller = (value) => {
     let deletCopy = [...todos];
     const deleteItem = deletCopy.find((val) => val.dt === value.dt);
@@ -26,13 +20,15 @@ const Home = () => {
     setTodos(deletCopy);
   };
   const finalDeleteHandeller = (value) => {
-    let confirmation= window.confirm('Are you sure you want to delete..................?')
-    if(confirmation){
-      let a = todos.filter((val) => {
-        return val.dt !== value.dt;
-      });
-      setTodos(a);
-    } 
+    let a = todos.filter((val) => {
+      return val.dt !== value.dt;
+    });
+    setTodos(a);
+  };
+  const editHandeller = (value) => {
+    setEdit(value);
+    setEditMode(true);
+    navigate("/add");
   };
   const allHandeller = () => {
     setAll(true);
@@ -85,16 +81,25 @@ const Home = () => {
   );
   let fil = !search ? todos : search;
   const addDataHandeller = () => {
-    setPopupDispay(!poopupDisplay)
     if (!mainSearch) {
-      setPopupDispay(true)
+      navigate("/add");
     } else if (search.length > 0) {
       let searchTodo = todos.find((value) => value.headding === mainSearch);
       if (!searchTodo) {
-        setPopupDispay(true)
+        //     setErrorMessage('data allready exist want to edit then edit the data')
+        //     setEdit(searchTodo);
+        // setEditMode(true);
+        // navigate("/add");
+        // setAddBtnDisabled(true)
+        setSearchEdit(mainSearch);
+        navigate("/add");
       } 
+      // else {
+        
+      // }
     } else {
-      setPopupDispay(true)
+      setSearchEdit(mainSearch);
+      navigate("/add");
     }
   };
   const mainSearchHandeller = (e) => {
@@ -103,8 +108,6 @@ const Home = () => {
     let headds = todocop.map((val) => val.headding);
     setAddBtnDisabled(headds.includes(e.target.value));
   };
- 
-
   return (
     <>
       <div>
@@ -123,11 +126,7 @@ const Home = () => {
             Add
           </button>
         </div>
-        <div className="w-50">
-        </div>
-        {poopupDisplay && <div style={{position:"absolute",zIndex:1 ,top:'10%',left:'40%' }}>
-        <InputDataComponent todos={todos}  addTodoHandeller={addTodoHandeller}  mainSearch={mainSearch} setMainSearch={setMainSearch} setPopupDispay={setPopupDispay}/>
-        </div>}
+        <div className="w-50"></div>
       </div>
       <div className="d-flex  p-1">
         <div>
@@ -143,15 +142,15 @@ const Home = () => {
               fil.map((value, index) => {
                 if (!value.deleted) {
                   return (
-                  <AllDataDisplayComponent
-                      todos={todos}
-                      setTodos={setTodos}
+                    <AllDataDisplayComponent
                       key={index}
                       value={value}
                       index={index}
                       divtimeDisplayHandeller={divtimeDisplayHandeller}
+                      editHandeller={editHandeller}
                       deleteHandeller={deleteHandeller}
-                      onStaredHandeller={onStaredHandeller}/>
+                      onStaredHandeller={onStaredHandeller}
+                    />
                   );
                 } else {
                   return null;
@@ -192,10 +191,10 @@ const Home = () => {
               })}
           </div>
         </div>
-        {countAll !== 0 ? (<div className="d-flex flex-column justify-content-start ml-7"
+        {countAll !== 0 ? (<div className="d-flex flex-column justify-content-start ml-7 ovScroll"
           style={{ position: "fixed", right: "20%", top: "10%" }}>
+            <h1 style={{overflow:"hidden",width:'300px',height:'41px'}}>{timeDisplay[1]}</h1>
             <p>{timeDisplay[0]}</p>
-            <h2 style={{overflow:"auto",width:'300px',height:'200px',overflowWrap:'anywhere'}}>{timeDisplay[1]}</h2>
           </div>) : ("")}
       </div>
     </>
