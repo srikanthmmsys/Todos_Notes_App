@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import '../App.css'
-const InputDataComponent = ({todos,setTodos,addTodoHandeller,edit,setEdit,editmode,setEditMode,mainSearch,setMainSearch}) => {
-  const navigate = useNavigate();
-  const [indata, setIndata] = useState(editmode ? edit.headding : mainSearch);
-  const [desc, setDesc] = useState(editmode ? edit.description : '');
+const InputDataComponent = ({todos,addTodoHandeller,mainSearch,setMainSearch,setPopupDispay}) => {
+  const [indata, setIndata] = useState(mainSearch);
+  const [desc, setDesc] = useState('');
   const [inputExist,setInputExist]=useState(false)
   const [errorMessage,setErrorMessage]=useState('')
   const indataHandeller = (e) => {
@@ -26,44 +24,27 @@ const InputDataComponent = ({todos,setTodos,addTodoHandeller,edit,setEdit,editmo
 
   const formSubmitHandeller = (e) => {
     e.preventDefault();
-    if (!editmode) {
       let indate = new Date();
       let fullDate = `${indate.toLocaleDateString()}  ${indate.toLocaleTimeString()}`;
       let totalData = {headding: indata.replace(/\s+/g,' '),description: desc.replace(/\s+/g,' '),dt: fullDate,stared: false,deleted: false};
   
       if(totalData.headding === ""||totalData.description==="") {
-        navigate("/");
+        setErrorMessage("*Please Fill headding or description it can't be empty.")
       }
       else if(totalData.headding === " "||totalData.description===' ') {
-        navigate("/");
+        setErrorMessage("*space is not accepted Please Fill headding or description")
       }
       else {
         addTodoHandeller(totalData);
         setMainSearch('');
-        setEdit([]);
         setErrorMessage('')
-        navigate("/");
+        setPopupDispay(false)
       }
-    } 
-    else {
-      let todoCopy = [...todos];
-      const editAvalible = todoCopy.find((val) => val.dt === edit.dt);
-      editAvalible.headding = indata.replace(/\s+/g,' ');
-      editAvalible.description = desc.replace(/\s+/g,' ');
-      setTodos(todoCopy);
-      setEditMode(false);
-      setEdit([]);
-      setErrorMessage('')
-      setMainSearch('');
-      navigate("/");
-    }
   };
 const cancelHandeller=()=>{
-  setEditMode(false);
-      setEdit([]);
       setMainSearch('');
       setErrorMessage('')
-      navigate("/");
+      setPopupDispay(false)
 }
 
   return (
@@ -72,30 +53,20 @@ const cancelHandeller=()=>{
         id="inputDataComp"
         className="text-center container-fluid card d-flex flex-column"
         onSubmit={formSubmitHandeller}>
-          
             <h3 className="d-flex flex-row justify-content-center text-danger">Add Notes</h3>
-          
-        <div className="ml-15">
-          {/* <div className="d-flex justify-content-center"> */}
+           {/* <div className="ml-15">
+          </div> */}
             <div className="text-danger">{errorMessage}</div>
-            {/* <button  className={editButtonHide ? "btn btn-warning":"btn btn-warning d-none"} onClick={splEditButtonHandeller}>Edit</button> */}
-          </div>
           <label className="text-info d-flex align-left">Headding</label>
           <input className="" value={indata} onChange={indataHandeller} />
-        {/* </div> */}
-        {/* <div className="d-flex justify-content-center"> */}
           <label className="text-info  d-flex align-left">Description</label>
           <textarea
             className=""
             rows={5}
-            // cols={22}
             value={desc}
-            onChange={descHandeller}
-          />
-        {/* </div> */}
+            onChange={descHandeller}/>
         <div className="d-flex flex-row justify-content-center m-2 ">
-          <button className="m-2 btn btn-success" type="submit" disabled={inputExist}>
-            {editmode?"Save":"Add"}
+          <button className="m-2 btn btn-success" type="submit" disabled={inputExist}>Add
           </button>
             <button className="m-2 btn btn-danger" onClick={cancelHandeller}>Cancel</button>
         </div>
